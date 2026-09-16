@@ -8,6 +8,9 @@
 #include "PlataformaAcuatica.h"
 #include "PlataformaTerrestre.h"
 #include "PlataformaSubterranea.h"
+//Paimball
+#include "PlataformaIndestructible.h"
+#include "PlataformaDestructible.h"
 
 AAventuraUSFX022026L4GameMode::AAventuraUSFX022026L4GameMode()
 {
@@ -30,19 +33,55 @@ void AAventuraUSFX022026L4GameMode::BeginPlay()
 
 	Parametros.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
+	// Posiciones disponibles dentro del mini escenario
+	TArray<FVector> PosicionesDisponibles;
+
+	for (int X = 350; X <= 750; X += 130)
+	{
+		for (int Y = -350; Y <= 350; Y += 175)
+		{
+			PosicionesDisponibles.Add(
+				FVector(X, Y, 160.0f)
+			);
+		}
+	}
+	//Creacion de 5 a 20 plataformas
+	int CantidadPlataformas = FMath::RandRange(5, 20);
+	aPlataformas.Reserve(CantidadPlataformas);
+	APlataforma* PlataformaActual = nullptr;
+
+	for (int i = 0; i < CantidadPlataformas; i++)
+	{
+		int IndiceAleatorio = FMath::RandRange(0,PosicionesDisponibles.Num() - 1);
+		FVector SpawnLocation = PosicionesDisponibles[IndiceAleatorio];
+		int TipoAleatorio = FMath::RandRange(0, 1);
+		if (TipoAleatorio == 0)
+		{
+			PlataformaActual = World->SpawnActor<APlataformaIndestructible>(SpawnLocation,Rotacion,Parametros);
+		}
+		else
+		{
+			PlataformaActual = World->SpawnActor<APlataformaDestructible>(SpawnLocation,Rotacion,Parametros);
+		}
+
+		if (IsValid(PlataformaActual))
+		{
+			aPlataformas.Add(PlataformaActual);
+		}
+
+		PosicionesDisponibles.RemoveAt(IndiceAleatorio);
+	}
+
+
+	/* Lab4
 	aPlataformas.Reserve(31);
 	APlataforma* PlataformaActual;
-
-
 	for (int32 i = 0; i < 10; i++)
 	{
 		int32 Fila = i / 5;
 		int32 Columna = i % 5;
-
 		FVector SpawnLocation(-800.0f + Columna * 400.0f, -800.0f + Fila * 400.0f, 1400.0f);
-
 		PlataformaActual = World->SpawnActor<APlataformaAerea>(SpawnLocation, Rotacion, Parametros);
-
 		if (IsValid(PlataformaActual))
 		{
 			aPlataformas.Add(PlataformaActual);
@@ -122,10 +161,12 @@ void AAventuraUSFX022026L4GameMode::BeginPlay()
 
 	GetWorldTimerManager().SetTimer(TimerMovimiento, this, &AAventuraUSFX022026L4GameMode::IniciarMovimiento, 5.0f, false);
 
-	/*GetWorldTimerManager().SetTimer(TimerEliminarUnaPlataformaPorHija, this, &AAventuraUSFX022026L4GameMode::EliminarUnaPlataformaPorHija, 5.0f, true);*/
+	GetWorldTimerManager().SetTimer(TimerEliminarUnaPlataformaPorHija, this, &AAventuraUSFX022026L4GameMode::EliminarUnaPlataformaPorHija, 5.0f, true);
 
 	GetWorldTimerManager().SetTimer(TimerReposicionarPlataformas, this, &AAventuraUSFX022026L4GameMode::ReposicionarPlataformas, 5.0f, false);
+*/
 }
+
 
 void AAventuraUSFX022026L4GameMode::IniciarMovimiento()
 {

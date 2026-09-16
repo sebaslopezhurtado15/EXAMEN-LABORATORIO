@@ -82,21 +82,15 @@ void APlataformaTerrestre::AlRecibirImpacto(UPrimitiveComponent* ComponenteGolpe
 	/*if (OtroActor != nullptr && OtroComponente != nullptr && OtroComponente->GetCollisionProfileName() == FName("Pawn"))
 	{
 		FVector DireccionGolpe = GetActorLocation() - OtroActor->GetActorLocation();
-
 		DireccionGolpe.Z = 0.0f;
 		DireccionGolpe = DireccionGolpe.GetSafeNormal();
-
 		posicionInicial = GetActorLocation();
-
 		movimientoEjes = FVector(1.0f, 1.0f, 0.0f);
 		movimientoDireccion = DireccionGolpe;
 		movimientoVelocidades = FVector(600.0f, 600.0f, 0.0f);
-
 		movimientoLimitesMaximos = FVector(800.0f, 800.0f, 0.0f);
 		movimientoLimitesMinimos = FVector(-800.0f, -800.0f, 0.0f);
-
 		IniciarMovimiento();
-
 		UE_LOG(LogTemp, Warning, TEXT("NAVE EMPUJO PLATAFORMA TERRESTRE"));
 	}*/
 

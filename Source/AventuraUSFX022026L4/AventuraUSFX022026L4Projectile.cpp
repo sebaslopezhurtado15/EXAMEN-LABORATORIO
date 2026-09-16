@@ -4,7 +4,6 @@
 #include "GameFramework/ProjectileMovementComponent.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Components/StaticMeshComponent.h"
-#include "GameFramework/ProjectileMovementComponent.h"
 #include "Engine/StaticMesh.h"
 
 AAventuraUSFX022026L4Projectile::AAventuraUSFX022026L4Projectile() 
@@ -15,22 +14,32 @@ AAventuraUSFX022026L4Projectile::AAventuraUSFX022026L4Projectile()
 	// Create mesh component for the projectile sphere
 	ProjectileMesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ProjectileMesh0"));
 	ProjectileMesh->SetStaticMesh(ProjectileMeshAsset.Object);
+	// Paintball: pelota un poco mas grande
+	ProjectileMesh->SetRelativeScale3D(FVector(1.2f, 1.2f, 1.2f));
+
 	ProjectileMesh->SetupAttachment(RootComponent);
 	ProjectileMesh->BodyInstance.SetCollisionProfileName("Projectile");
 	ProjectileMesh->OnComponentHit.AddDynamic(this, &AAventuraUSFX022026L4Projectile::OnHit);		// set up a notification for when this component hits something
 	RootComponent = ProjectileMesh;
 
-	// Use a ProjectileMovementComponent to govern this projectile's movement
+	//Pimball
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement0"));
 	ProjectileMovement->UpdatedComponent = ProjectileMesh;
 	ProjectileMovement->InitialSpeed = 3000.f;
 	ProjectileMovement->MaxSpeed = 3000.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
-	ProjectileMovement->bShouldBounce = false;
+	// Rebote
+	ProjectileMovement->bShouldBounce = true;
+	ProjectileMovement->Bounciness = 1.0f;
+
+	// Evita que la pelota se eleve en Z
+	ProjectileMovement->bConstrainToPlane = true;
+	ProjectileMovement->SetPlaneConstraintNormal(FVector(0.0f, 0.0f, 1.0f));
+
 	ProjectileMovement->ProjectileGravityScale = 0.f; // No gravity
 
-	// Die after 3 seconds by default
-	InitialLifeSpan = 3.0f;
+	// destruir 0,0f 
+	InitialLifeSpan = 0.0f;
 }
 
 
@@ -45,5 +54,5 @@ void AAventuraUSFX022026L4Projectile::OnHit(UPrimitiveComponent* HitComp, AActor
 	//mensaje
 	UE_LOG(LogTemp, Warning, TEXT("COLISION BLOCK: proyectil golpeo una plataforma"));
 
-	Destroy();
+	//Destroy();
 }

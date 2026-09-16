@@ -12,6 +12,7 @@
 #include "Engine/StaticMesh.h"
 #include "Kismet/GameplayStatics.h"
 #include "Sound/SoundBase.h"
+#include "Materials/Material.h"
 
 const FName AAventuraUSFX022026L4Pawn::MoveForwardBinding("MoveForward");
 const FName AAventuraUSFX022026L4Pawn::MoveRightBinding("MoveRight");
@@ -20,7 +21,8 @@ const FName AAventuraUSFX022026L4Pawn::FireRightBinding("FireRight");
 
 AAventuraUSFX022026L4Pawn::AAventuraUSFX022026L4Pawn()
 {	
-	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("/Game/TwinStick/Meshes/TwinStickUFO.TwinStickUFO"));
+	//Pimball
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> ShipMesh(TEXT("StaticMesh'/Game/StarterContent/Shapes/Shape_Cube.Shape_Cube'"));
 	// Create the mesh component
 	ShipMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShipMesh"));
 	RootComponent = ShipMeshComponent;
@@ -30,7 +32,17 @@ AAventuraUSFX022026L4Pawn::AAventuraUSFX022026L4Pawn()
 	ShipMeshComponent->SetGenerateOverlapEvents(true);
 
 	ShipMeshComponent->SetStaticMesh(ShipMesh.Object);
-	
+
+	// Material negro del Pawn paimball
+	static ConstructorHelpers::FObjectFinder<UMaterial> MaterialNegro(TEXT("Material'/Game/MaterialesPaintball/M_PawNegra.M_PawNegra'"));
+	if (MaterialNegro.Succeeded())
+	{
+		ShipMeshComponent->SetMaterial(0, MaterialNegro.Object);
+	}
+
+	//Pimball
+	ShipMeshComponent->SetRelativeScale3D(FVector(0.5f, 2.5f, 0.5f));
+
 	// Cache our sound effect
 	static ConstructorHelpers::FObjectFinder<USoundBase> FireAudio(TEXT("/Game/TwinStick/Audio/TwinStickFire.TwinStickFire"));
 	FireSound = FireAudio.Object;
@@ -38,9 +50,15 @@ AAventuraUSFX022026L4Pawn::AAventuraUSFX022026L4Pawn()
 	// Create a camera boom...
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
+
+	// Centra la camara en el mini escenario
+	CameraBoom->TargetOffset = FVector(400.0f, 0.0f, 0.0f);
+
 	CameraBoom->SetUsingAbsoluteRotation(true); // Don't want arm to rotate when ship does
-	CameraBoom->TargetArmLength = 1200.f;
-	CameraBoom->SetRelativeRotation(FRotator(-80.f, 0.f, 0.f));
+
+	//camara paimball
+	CameraBoom->TargetArmLength = 1500.f;
+	CameraBoom->SetRelativeRotation(FRotator(-90.f, 0.f, 0.f));
 	CameraBoom->bDoCollisionTest = false; // Don't want to pull camera in when it collides with level
 
 	// Create a camera...
@@ -69,12 +87,10 @@ void AAventuraUSFX022026L4Pawn::SetupPlayerInputComponent(class UInputComponent*
 
 void AAventuraUSFX022026L4Pawn::Tick(float DeltaSeconds)
 {
-	// Find movement direction
-	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
+	//pimball solo der-izq
 	const float RightValue = GetInputAxisValue(MoveRightBinding);
+	const FVector MoveDirection = FVector(0.0f, RightValue, 0.0f);
 
-	// Clamp max size so that (X=1, Y=1) doesn't cause faster movement in diagonal directions
-	const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.f).GetClampedToMaxSize(1.0f);
 
 	// Calculate  movement
 	const FVector Movement = MoveDirection * MoveSpeed * DeltaSeconds;
@@ -82,7 +98,9 @@ void AAventuraUSFX022026L4Pawn::Tick(float DeltaSeconds)
 	// If non-zero size, move this actor
 	if (Movement.SizeSquared() > 0.0f)
 	{
-		const FRotator NewRotation = Movement.Rotation();
+		//paimball
+		const FRotator NewRotation = GetActorRotation();
+
 		FHitResult Hit(1.f);
 		RootComponent->MoveComponent(Movement, NewRotation, true, &Hit);
 		
@@ -94,7 +112,7 @@ void AAventuraUSFX022026L4Pawn::Tick(float DeltaSeconds)
 		}
 	}
 	
-	// Create fire direction vector
+	
 	const float FireForwardValue = GetInputAxisValue(FireForwardBinding);
 	const float FireRightValue = GetInputAxisValue(FireRightBinding);
 	const FVector FireDirection = FVector(FireForwardValue, FireRightValue, 0.f);
