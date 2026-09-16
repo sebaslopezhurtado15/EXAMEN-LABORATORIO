@@ -5,6 +5,7 @@
 #include "UObject/ConstructorHelpers.h"
 #include "Components/StaticMeshComponent.h"
 #include "Engine/StaticMesh.h"
+#include "PlataformaIndestructible.h"
 
 AAventuraUSFX022026L4Projectile::AAventuraUSFX022026L4Projectile() 
 {
@@ -25,12 +26,17 @@ AAventuraUSFX022026L4Projectile::AAventuraUSFX022026L4Projectile()
 	//Pimball
 	ProjectileMovement = CreateDefaultSubobject<UProjectileMovementComponent>(TEXT("ProjectileMovement0"));
 	ProjectileMovement->UpdatedComponent = ProjectileMesh;
-	ProjectileMovement->InitialSpeed = 3000.f;
-	ProjectileMovement->MaxSpeed = 3000.f;
+	ProjectileMovement->InitialSpeed = 1500.f;
+	ProjectileMovement->MaxSpeed = 1600.f;
 	ProjectileMovement->bRotationFollowsVelocity = true;
 	// Rebote
 	ProjectileMovement->bShouldBounce = true;
 	ProjectileMovement->Bounciness = 1.0f;
+
+	// Evitar que la pelota se detenga en las esquinas
+	ProjectileMovement->BounceVelocityStopSimulatingThreshold = 0.0f;
+	ProjectileMovement->Friction = 0.0f;
+
 
 	// Evita que la pelota se eleve en Z
 	ProjectileMovement->bConstrainToPlane = true;
@@ -45,6 +51,27 @@ AAventuraUSFX022026L4Projectile::AAventuraUSFX022026L4Projectile()
 
 void AAventuraUSFX022026L4Projectile::OnHit(UPrimitiveComponent* HitComp, AActor* OtherActor, UPrimitiveComponent* OtherComp, FVector NormalImpulse, const FHitResult& Hit)
 {
+	// Evitar rebote infinito entre plataformas indestructibles
+	if (Cast<APlataformaIndestructible>(OtherActor))
+	{
+		float Angulo = FMath::RandBool() ? 10.0f : -10.0f;
+
+		ProjectileMovement->Velocity = ProjectileMovement->Velocity.RotateAngleAxis(Angulo,FVector(0.0f, 0.0f, 1.0f));
+	}
+
+	// Aumentar velocidad cuando golpea al Pawn
+	if (OtherComp != nullptr && OtherComp->GetCollisionProfileName() == FName("Pawn"))
+	{
+		ProjectileMovement->Velocity *= 1.10f;
+		ProjectileMovement->Velocity = ProjectileMovement->Velocity.GetClampedToMaxSize(ProjectileMovement->MaxSpeed);
+
+		// Cambiar un poco la direccion
+		float Angulo = FMath::RandBool() ? 15.0f : -15.0f;
+		ProjectileMovement->Velocity = ProjectileMovement->Velocity.RotateAngleAxis(Angulo,FVector(0.0f, 0.0f, 1.0f));
+
+		UE_LOG(LogTemp, Warning, TEXT("Velocidad pelota: %f"),ProjectileMovement->Velocity.Size());
+	}
+
 	// Only add impulse and destroy projectile if we hit a physics
 	if ((OtherActor != nullptr) && (OtherActor != this) && (OtherComp != nullptr) && OtherComp->IsSimulatingPhysics())
 	{

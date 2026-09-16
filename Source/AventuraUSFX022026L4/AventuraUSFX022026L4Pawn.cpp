@@ -68,8 +68,8 @@ AAventuraUSFX022026L4Pawn::AAventuraUSFX022026L4Pawn()
 
 	// Movement
 	MoveSpeed = 1000.0f;
-	// Weapon
-	GunOffset = FVector(90.f, 0.f, 0.f);
+	// nace proyectil
+	GunOffset = FVector(180.f, 0.f, 0.f);
 	FireRate = 0.1f;
 	bCanFire = true;
 }
@@ -90,7 +90,12 @@ void AAventuraUSFX022026L4Pawn::Tick(float DeltaSeconds)
 	//pimball solo der-izq
 	const float RightValue = GetInputAxisValue(MoveRightBinding);
 	const FVector MoveDirection = FVector(0.0f, RightValue, 0.0f);
-
+	 
+ 
+	/*mov antiguo paw
+	const float ForwardValue = GetInputAxisValue(MoveForwardBinding);
+	const FVector MoveDirection = FVector(ForwardValue, RightValue, 0.0f).GetClampedToMaxSize(1.0f);
+	*/
 
 	// Calculate  movement
 	const FVector Movement = MoveDirection * MoveSpeed * DeltaSeconds;
@@ -115,7 +120,12 @@ void AAventuraUSFX022026L4Pawn::Tick(float DeltaSeconds)
 	
 	const float FireForwardValue = GetInputAxisValue(FireForwardBinding);
 	const float FireRightValue = GetInputAxisValue(FireRightBinding);
+	// Disparo diagonal con < o >
+	const FVector FireDirection = FVector(FMath::Abs(FireRightValue), FireRightValue, 0.0f);
+
+	/* antigua < o >
 	const FVector FireDirection = FVector(FireForwardValue, FireRightValue, 0.f);
+	*/
 
 	// Try and fire a shot
 	FireShot(FireDirection);
