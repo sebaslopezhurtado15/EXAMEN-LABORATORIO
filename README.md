@@ -417,10 +417,3 @@ En cada ejecución se genera aleatoriamente una cantidad de entre 5 y 20 platafo
 
 https://github.com/sebaslopezhurtado15/EXAMEN-LABORATORIO/tree/master
 
----
-
-## 16. Video
-
-Enlace al video explicativo:
-
-`Agregar enlace del video aquí`
